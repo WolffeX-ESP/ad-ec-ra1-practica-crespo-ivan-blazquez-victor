@@ -7,7 +7,7 @@ import jakarta.xml.bind.Unmarshaller;
 
 import java.io.File;
 
-public class ProductoDAOImpl {
+public class ProductoDAOImpl implements ProductoDAO {
     /**
      *
      *
