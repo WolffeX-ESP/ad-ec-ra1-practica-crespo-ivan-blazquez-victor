@@ -39,15 +39,12 @@ public class ProductoService {
             finally we discovered about this is am object and we have to use the specific methods.
              */
 
-            // add final price with the percentual discount and doing a value.of
-            BigDecimal precioFinal = (producto.getPrecio().multiply(producto.getDescuento())).divide(BigDecimal.valueOf(100));
+            BigDecimal precioFinal = producto.getPrecio().subtract(producto.getDescuento());
             productoEntity.setPrecioFinal(precioFinal);
 
-            // add cost
             BigDecimal costes = producto.getCostes().getCostesAlmacenaje().add(producto.getCostes().getCostesEnvio());
             productoEntity.setCost(costes);
 
-            // add benefits
             BigDecimal beneficio = precioFinal.subtract(costes);
             productoEntity.setProfit(beneficio);
             resultado.add(productoEntity);
