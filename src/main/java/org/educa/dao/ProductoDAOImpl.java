@@ -11,13 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class ProductoDAOImpl implements ProductoDAO {
-    /**
-     *
-     *
-     * @param fileXml path of the XML file to read
-     * @return Productos object containing all the products in the file
-     * @throws JAXBException if an error occurs while reading or parsing the XML
-     */
+
     public Productos readXml(String fileXml) throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(Productos.class);
         Unmarshaller unmarshaller = context.createUnmarshaller();
