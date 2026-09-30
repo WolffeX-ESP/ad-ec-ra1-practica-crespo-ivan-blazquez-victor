@@ -7,7 +7,6 @@ import org.educa.dao.ProductoDAO;
 import org.educa.dao.ProductoDAOImpl;
 import org.educa.entity.ProductoEntity;
 
-import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
