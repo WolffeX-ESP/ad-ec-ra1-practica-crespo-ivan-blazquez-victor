@@ -62,51 +62,87 @@ public class ProductoService {
      * Read a product XML then calculates the total profit and exports a summary file
      *
      * @param path this is the destination directory path where the file will be saved
-     * @param fileXml this is the path of the XML file
+     * @param fileXml this is the absolute path of the XML file
      * @throws JAXBException control if occur an error of unmarshalling or reading the XML file
      * @throws IOException if an error occcurs while creating or writing the summary
      */
 
     public void exportSummary(String path, String fileXml) throws JAXBException, IOException {
-        // Read the list of products
+        // Read the list of products and then calculate the total profit
         List<ProductoEntity> productoEntities = readFile(fileXml);
+        BigDecimal beneficioTotal = calculateTotalBenefit(productoEntities);
 
-        // Calculate the total profit
-        BigDecimal beneficioT = BigDecimal.valueOf(0);
-        for (ProductoEntity p : productoEntities){
-             beneficioT =  beneficioT.add(p.getProfit());
-        }
+        // Prepare the file and destination
+        File file = buildNameTxt(path, fileXml);
 
-        // Transform the name
-        File xmlFile = new File(fileXml);
-        String nombreXml = xmlFile.getName();
-        String extension = nombreXml.replace(".xml", ".txt");
-        String nombreTxt = nombreXml.replace("inventario_", "result_");
+        // Create the summary entity
+        SummaryEntity summaryEntity = createSummaryEntity(productoEntities.size(), beneficioTotal, file);
 
-        // Check that the directory exists and create it.
-        File directorio = new File(path);
-        directorio.mkdirs();
-
-        // Build the final TXT
-        File txtFinal = new File(directorio, nombreTxt);
-
-        // Create the entity resume
-        SummaryEntity summaryEntity = new SummaryEntity();
-        summaryEntity.setName(LocalDate.now().toString());
-        summaryEntity.setNumberOfProducts(productoEntities.size());
-        summaryEntity.setTotalProfit(beneficioT);
-        summaryEntity.setFileName(txtFinal.getPath());
-        summaryEntity.setFileAbsolutePath(txtFinal.getAbsolutePath());
-
-        // This is the first write to generate de txt on the disk
+        // This is the first write to generate the txt on the disk
         productoDAO.writeFile(summaryEntity);
 
         // Measures the file size
-        summaryEntity.setFileSize(txtFinal.length());
+        summaryEntity.setFileSize(file.length());
 
         // This is de second write to save the final information with the correct lenght
         productoDAO.writeFile(summaryEntity);
 
+    }
+
+    /**
+     * Sums the individual profit of all the products of the list.
+     *
+     * @param productoEntities list of product entities that contain the profit values.
+     * @return the accumulated total profit.
+     */
+
+    private BigDecimal calculateTotalBenefit(List<ProductoEntity> productoEntities) {
+        BigDecimal beneficioTot = BigDecimal.ZERO;
+        for (ProductoEntity producto : productoEntities){
+            beneficioTot = beneficioTot.add(producto.getProfit());
+        }
+        return beneficioTot;
+    }
+
+    /**
+     * Transform the input XML filename to a TXT summary format
+     * and then create the directories if it doesn't exist.
+     *
+     * @param path destination of directory path.
+     * @param fileXml the input XML path.
+     * @return an object with the directory and the new file name.
+     */
+    private File buildNameTxt(String path, String fileXml) {
+        File xmlFile = new File(fileXml);
+        String nombreXml = xmlFile.getName();
+
+        String nombreTxt = nombreXml.replace("inventario_", "result_").replace(".xml", ".txt");
+
+        File directorio = new File(path);
+        if (!directorio.exists()) {
+            directorio.mkdirs();
+        }
+
+        return new File(directorio, nombreTxt);
+    }
+
+    /**
+     * Builds and filled the SummaryEntity with the product counts, total profit
+     * and file paths.
+     *
+     * @param productosCuenta total number of processed products.
+     * @param beneficioTotal accumulate the profit sum.
+     * @param finalFile the output file reference.
+     * @return a filled SummaryEntity with all the instances
+     */
+    private SummaryEntity createSummaryEntity(int productosCuenta, BigDecimal beneficioTotal, File finalFile) {
+        SummaryEntity summary = new SummaryEntity();
+        summary.setName(LocalDate.now().toString());
+        summary.setNumberOfProducts(productosCuenta);
+        summary.setTotalProfit(beneficioTotal);
+        summary.setFileName(finalFile.getPath());
+        summary.setFileAbsolutePath(finalFile.getAbsolutePath());
+        return summary;
     }
 
     public void exportExcel(String path, String fileXml) throws JAXBException, IOException, ParseException {
