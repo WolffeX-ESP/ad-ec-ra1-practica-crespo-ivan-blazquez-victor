@@ -97,7 +97,7 @@ public class ProductoService {
      */
 
     private BigDecimal calculateTotalBenefit(List<ProductoEntity> productoEntities) {
-        BigDecimal beneficioTot = BigDecimal.ZERO;
+        BigDecimal beneficioTot = BigDecimal.valueOf(0);
         for (ProductoEntity producto : productoEntities){
             beneficioTot = beneficioTot.add(producto.getProfit());
         }
