@@ -3,12 +3,16 @@ package org.educa.service;
 import generated.Producto;
 import generated.Productos;
 import jakarta.xml.bind.JAXBException;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.educa.dao.ProductoDAO;
 import org.educa.dao.ProductoDAOImpl;
 import org.educa.entity.ProductoEntity;
 import org.educa.entity.SummaryEntity;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -87,8 +91,8 @@ public class ProductoService {
         // This recibe the products using methods of exercise 1
         List<ProductoEntity> productos = readFile(fileXml);
         // We create the book and file of Excel
-        org.apache.poi.xssf.usermodel.XSSFWorkbook libro = new org.apache.poi.xssf.usermodel.XSSFWorkbook();
-        org.apache.poi.xssf.usermodel.XSSFSheet hoja = libro.createSheet("ResumenInventario");
+        XSSFWorkbook libro = new XSSFWorkbook();
+        XSSFSheet hoja = libro.createSheet("ResumenInventario");
         // Calling teh auxiliar methods
         createHeaderRow(hoja);
         fillDataRows(hoja, productos);
@@ -217,8 +221,8 @@ public class ProductoService {
      * Creates the first row of the Excel being the tittles of the columns.
      * @param hoja is the Excel file.
      */
-    private void createHeaderRow(org.apache.poi.xssf.usermodel.XSSFSheet hoja) {
-        org.apache.poi.xssf.usermodel.XSSFRow filaCabecera = hoja.createRow(0);
+    private void createHeaderRow(XSSFSheet hoja) {
+        XSSFRow filaCabecera = hoja.createRow(0);
         filaCabecera.createCell(0).setCellValue("Código");
         filaCabecera.createCell(1).setCellValue("Marca");
         filaCabecera.createCell(2).setCellValue("Modelo");
@@ -233,10 +237,10 @@ public class ProductoService {
      * @param hoja is the Excel file where the data will be added.
      * @param productos is a list of products entity with all the information.
      */
-    private void fillDataRows(org.apache.poi.xssf.usermodel.XSSFSheet hoja, List<ProductoEntity> productos) {
+    private void fillDataRows(XSSFSheet hoja, List<ProductoEntity> productos) {
         int numeroFila = 1;
         for (ProductoEntity p : productos) {
-            org.apache.poi.xssf.usermodel.XSSFRow fila = hoja.createRow(numeroFila);
+            XSSFRow fila = hoja.createRow(numeroFila);
             
             fila.createCell(0).setCellValue(p.getProducto().getCodigo());
             fila.createCell(1).setCellValue(p.getProducto().getMarca());
@@ -256,15 +260,15 @@ public class ProductoService {
      * @param path is the destination directory.
      * @throws IOException this eror is for the operations of input and output.
      */
-    private void saveExcelFile(org.apache.poi.xssf.usermodel.XSSFWorkbook libro, String path) throws IOException {
-        java.io.File carpeta = new java.io.File(path);
+    private void saveExcelFile(XSSFWorkbook libro, String path) throws IOException {
+        File carpeta = new File(path);
         // a validation to know if the directory exists and if it doesn't, create a new one
         if (!carpeta.exists()) {
             carpeta.mkdirs();
         }
 
-        java.io.File archivoExcel = new java.io.File(carpeta, "inventario_final.xlsx");
-        java.io.FileOutputStream salida = new java.io.FileOutputStream(archivoExcel);
+        File archivoExcel = new File(carpeta, "inventario_final.xlsx");
+        FileOutputStream salida = new FileOutputStream(archivoExcel);
         libro.write(salida);
         salida.close();
         libro.close();
