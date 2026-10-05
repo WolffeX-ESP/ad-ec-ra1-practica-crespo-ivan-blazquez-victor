@@ -185,52 +185,53 @@ public class ProductoService {
     }
 
     public void exportExcel(String path, String fileXml) throws JAXBException, IOException, ParseException {
-        //TODO: Implementar
+        List<ProductoEntity> productos = readFile(fileXml);
 
         org.apache.poi.xssf.usermodel.XSSFWorkbook libro = new org.apache.poi.xssf.usermodel.XSSFWorkbook();
-
+        org.apache.poi.xssf.usermodel.XSSFSheet hoja = libro.createSheet("ResumenInventario");
 
         createHeaderRow(hoja);
-
+        fillDataRows(hoja, productos);
         saveExcelFile(libro, path);
     }
 
-
+    private void createHeaderRow(org.apache.poi.xssf.usermodel.XSSFSheet hoja) {
         org.apache.poi.xssf.usermodel.XSSFRow filaCabecera = hoja.createRow(0);
-
+        filaCabecera.createCell(0).setCellValue("Código");
         filaCabecera.createCell(1).setCellValue("Marca");
-
+        filaCabecera.createCell(2).setCellValue("Modelo");
         filaCabecera.createCell(3).setCellValue("Categoría");
-
+        filaCabecera.createCell(4).setCellValue("Precio Final");
         filaCabecera.createCell(5).setCellValue("Coste");
-
-
+        filaCabecera.createCell(6).setCellValue("Beneficio");
+    }
 
     private void fillDataRows(org.apache.poi.xssf.usermodel.XSSFSheet hoja, List<ProductoEntity> productos) {
-
+        int numeroFila = 1;
         for (ProductoEntity p : productos) {
-
-
+            org.apache.poi.xssf.usermodel.XSSFRow fila = hoja.createRow(numeroFila);
+            
             fila.createCell(0).setCellValue(p.getProducto().getCodigo());
-
+            fila.createCell(1).setCellValue(p.getProducto().getMarca());
             fila.createCell(2).setCellValue(p.getProducto().getModelo());
-
+            fila.createCell(3).setCellValue(p.getProducto().getCategoria());
             fila.createCell(4).setCellValue(p.getPrecioFinal().doubleValue());
-
+            fila.createCell(5).setCellValue(p.getCost().doubleValue());
             fila.createCell(6).setCellValue(p.getProfit().doubleValue());
-
+            numeroFila++;
         }
     }
 
     private void saveExcelFile(org.apache.poi.xssf.usermodel.XSSFWorkbook libro, String path) throws IOException {
-
+        java.io.File carpeta = new java.io.File(path);
         if (!carpeta.exists()) {
-
+            carpeta.mkdirs();
         }
+        
         java.io.File archivoExcel = new java.io.File(carpeta, "inventario_final.xlsx");
-
+        java.io.FileOutputStream salida = new java.io.FileOutputStream(archivoExcel);
         libro.write(salida);
-
+        salida.close();
         libro.close();
-    }
+
 }
