@@ -186,5 +186,51 @@ public class ProductoService {
 
     public void exportExcel(String path, String fileXml) throws JAXBException, IOException, ParseException {
         //TODO: Implementar
+
+        org.apache.poi.xssf.usermodel.XSSFWorkbook libro = new org.apache.poi.xssf.usermodel.XSSFWorkbook();
+
+
+        createHeaderRow(hoja);
+
+        saveExcelFile(libro, path);
+    }
+
+
+        org.apache.poi.xssf.usermodel.XSSFRow filaCabecera = hoja.createRow(0);
+
+        filaCabecera.createCell(1).setCellValue("Marca");
+
+        filaCabecera.createCell(3).setCellValue("Categoría");
+
+        filaCabecera.createCell(5).setCellValue("Coste");
+
+
+
+    private void fillDataRows(org.apache.poi.xssf.usermodel.XSSFSheet hoja, List<ProductoEntity> productos) {
+
+        for (ProductoEntity p : productos) {
+
+
+            fila.createCell(0).setCellValue(p.getProducto().getCodigo());
+
+            fila.createCell(2).setCellValue(p.getProducto().getModelo());
+
+            fila.createCell(4).setCellValue(p.getPrecioFinal().doubleValue());
+
+            fila.createCell(6).setCellValue(p.getProfit().doubleValue());
+
+        }
+    }
+
+    private void saveExcelFile(org.apache.poi.xssf.usermodel.XSSFWorkbook libro, String path) throws IOException {
+
+        if (!carpeta.exists()) {
+
+        }
+        java.io.File archivoExcel = new java.io.File(carpeta, "inventario_final.xlsx");
+
+        libro.write(salida);
+
+        libro.close();
     }
 }
