@@ -184,17 +184,36 @@ public class ProductoService {
         return summary;
     }
 
-    public void exportExcel(String path, String fileXml) throws JAXBException, IOException, ParseException {
-        List<ProductoEntity> productos = readFile(fileXml);
+    /*
+        We had a lot of problems when we tried programming horizontal because when we did the merge,
+        we had a merge confliction,
+        and we solve it thanks to the tools of GitHub pointing out the problems of the code.
+     */
 
+    /**
+     * This method is about of exporting the excel from the xml file with the help of the library of apache poi.
+     * @param path destination of directory path.
+     * @param fileXml the input XML path.
+     * @throws JAXBException is de main exception for all the errors concurring while the proccess xml link.
+     * @throws IOException this eror is for the operations of input and output.
+     * @throws ParseException for the wrong string text.
+     */
+    public void exportExcel(String path, String fileXml) throws JAXBException, IOException, ParseException {
+        // This recibe the products using methods of exercise 1
+        List<ProductoEntity> productos = readFile(fileXml);
+        // We create the book and file of Excel
         org.apache.poi.xssf.usermodel.XSSFWorkbook libro = new org.apache.poi.xssf.usermodel.XSSFWorkbook();
         org.apache.poi.xssf.usermodel.XSSFSheet hoja = libro.createSheet("ResumenInventario");
-
+        // Calling teh auxiliar methods
         createHeaderRow(hoja);
         fillDataRows(hoja, productos);
         saveExcelFile(libro, path);
     }
 
+    /**
+     * Creates the first row of the Excel being the tittles of the columns.
+     * @param hoja is the Excel file.
+     */
     private void createHeaderRow(org.apache.poi.xssf.usermodel.XSSFSheet hoja) {
         org.apache.poi.xssf.usermodel.XSSFRow filaCabecera = hoja.createRow(0);
         filaCabecera.createCell(0).setCellValue("Código");
@@ -206,6 +225,11 @@ public class ProductoService {
         filaCabecera.createCell(6).setCellValue("Beneficio");
     }
 
+    /**
+     * This method fills the rows with new cells and putting the data.
+     * @param hoja is the Excel file where the data will be added.
+     * @param productos is a list of products entity with all the information.
+     */
     private void fillDataRows(org.apache.poi.xssf.usermodel.XSSFSheet hoja, List<ProductoEntity> productos) {
         int numeroFila = 1;
         for (ProductoEntity p : productos) {
@@ -215,6 +239,7 @@ public class ProductoService {
             fila.createCell(1).setCellValue(p.getProducto().getMarca());
             fila.createCell(2).setCellValue(p.getProducto().getModelo());
             fila.createCell(3).setCellValue(p.getProducto().getCategoria());
+            // We transfer from BigDecimal to Double, just because for Excel to know it like numbers
             fila.createCell(4).setCellValue(p.getPrecioFinal().doubleValue());
             fila.createCell(5).setCellValue(p.getCost().doubleValue());
             fila.createCell(6).setCellValue(p.getProfit().doubleValue());
@@ -222,12 +247,19 @@ public class ProductoService {
         }
     }
 
+    /**
+     * Do the validation and creates the directory if it doesn't exists and save it.
+     * @param libro is the Excel book with all the data.
+     * @param path is the destination directory.
+     * @throws IOException this eror is for the operations of input and output.
+     */
     private void saveExcelFile(org.apache.poi.xssf.usermodel.XSSFWorkbook libro, String path) throws IOException {
         java.io.File carpeta = new java.io.File(path);
+        // a validation to know if the directory exists and if it doesn't, create a new one
         if (!carpeta.exists()) {
             carpeta.mkdirs();
         }
-        
+
         java.io.File archivoExcel = new java.io.File(carpeta, "inventario_final.xlsx");
         java.io.FileOutputStream salida = new java.io.FileOutputStream(archivoExcel);
         libro.write(salida);
