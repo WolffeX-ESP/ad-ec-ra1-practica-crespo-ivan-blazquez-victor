@@ -20,10 +20,10 @@ public class ProductoDAOImpl implements ProductoDAO {
     }
 
     @Override
-    public void writeFile(SummaryEntity summaryEntity){
+    public void writeFile(SummaryEntity summaryEntity) {
         try (FileWriter fileWriter = new FileWriter(summaryEntity.getFileName())) {
             fileWriter.write(summaryEntity.toPrint());
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
