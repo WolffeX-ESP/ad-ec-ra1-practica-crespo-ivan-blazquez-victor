@@ -185,6 +185,51 @@ public class ProductoService {
     }
 
     public void exportExcel(String path, String fileXml) throws JAXBException, IOException, ParseException {
-        //TODO: Implementar
+        List<ProductoEntity> productos = readFile(fileXml);
+
+
+        org.apache.poi.xssf.usermodel.XSSFSheet hoja = libro.createSheet("ResumenInventario");
+
+
+        fillDataRows(hoja, productos);
+
     }
+
+    private void createHeaderRow(org.apache.poi.xssf.usermodel.XSSFSheet hoja){
+
+        filaCabecera.createCell(0).setCellValue("Código");
+
+        filaCabecera.createCell(2).setCellValue("Modelo");
+
+        filaCabecera.createCell(4).setCellValue("Precio Final");
+
+        filaCabecera.createCell(6).setCellValue("Beneficio");
+    }
+
+
+    int numeroFila = 1;
+
+    org.apache.poi.xssf.usermodel.XSSFRow fila = hoja.createRow(numeroFila);
+
+
+    fila.createCell(1).setCellValue(p.getProducto().getMarca());
+
+    fila.createCell(3).setCellValue(p.getProducto().getCategoria());
+
+    fila.createCell(5).setCellValue(p.getCost().doubleValue());
+
+    numeroFila++;
+
+
+
+
+    java.io.File carpeta = new java.io.File(path);
+
+    carpeta.mkdirs();
+
+
+    java.io.FileOutputStream salida = new java.io.FileOutputStream(archivoExcel);
+
+    salida.close();
+
 }
