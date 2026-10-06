@@ -2,10 +2,12 @@ package org.educa.dao;
 
 import generated.Productos;
 import jakarta.xml.bind.JAXBException;
+import org.educa.entity.ProductoEntity;
 import org.educa.entity.SummaryEntity;
 
-import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.List;
 
 public interface ProductoDAO {
 
@@ -25,4 +27,14 @@ public interface ProductoDAO {
      */
     void writeFile(SummaryEntity summaryEntity);
 
+    /**
+     * Exports the inventory data to an Excel file using Apache POI.
+     *
+     * @param path    destination directory path.
+     * @param productos is the list of products.
+     * @throws JAXBException if an error occurs while processing the XML.
+     * @throws IOException   if an I/O error occurs.
+     * @throws ParseException if a text parsing error occurs.
+     */
+    void exportExcelDAO(String path, List<ProductoEntity> productos) throws JAXBException, IOException, ParseException;
 }
