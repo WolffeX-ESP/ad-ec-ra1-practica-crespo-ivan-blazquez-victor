@@ -7,7 +7,7 @@ Exercise 1: Read the XML and do the calculations.
 We read the 'inventario_junio2025.xml' and calculated the final price with discount, total cost and profit for each product
 
 1. Then we use JAXB in ProductoDAOImpl.java to read the XML file.
-2. In ProductoService.java we create a method called readFile. This method takes each product and use     BigDecimal to do calculationn:
+2. In ProductoService.java we create a method called readFile. This method takes each product and use BigDecimal to do calculation:
 
      * Final price: Substract the discount percentage from the original price.
      * Cost: Add storages costs + shipping costs.
@@ -27,11 +27,11 @@ foulder. This file must contain: the date, the number of products, the total pro
 
 Exercise 3: Excel Export with Apache POI via DAO Delegation
 
-Generate an `.xlsx` Excel file in the `src/main/resources/export` folder populated with the processed inventory data.
+Generate an .xlsx Excel file in the src/main/resources/export folder populated with the processed inventory data.
 
 1. Service Layer Coordination (ProductoService.java):
-   * The `exportExcel(path, fileXml) method reuses the readFile(fileXml) method from Exercise 1 to retrieve the list of products with their already calculated costs and profits (`List<ProductoEntity>`).
-   * It delegates the responsibility of creating and saving the Excel file to the DAO by calling `productoDAO.exportExcelDAO(path, productos).
+   * The exportExcel(path, fileXml) method reuses the readFile(fileXml) method from Exercise 1 to retrieve the list of products with their already calculated costs and profits (List<ProductoEntity>).
+   * It delegates the responsibility of creating and saving the Excel file to the DAO by calling productoDAO.exportExcelDAO(path, productos).
   
 2. DAO Layer File Creation & Styling (ProductoDAOImpl.java):
    We implemented the 'exportExcelDAO' method using private helper methods to keep the code clean and maintainable:
