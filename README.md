@@ -21,8 +21,10 @@ foulder. This file must contain: the date, the number of products, the total pro
 1. In ProductoService.java, the exportSummary method sums up the total profit across all products.
 2. Created a helper method buildNameTxt to convert the input filename from .xml to .txt and ensure the target directory exists.
 3. To calculate the exact size of the resulting .txt file:
-      *First, we write the file to disk via productoDAO.writeFile.
-       * Then, we read its generated length using file.length().
-        *Finally, we update the fileSize field and rewrite the file with the exact byte size.
+     * First, we write the file to disk via productoDAO.writeFile.
+     * Then, we read its generated length using file.length().
+     * Finally, we update the fileSize field and rewrite the file with the exact byte size.
+
+
 
 
