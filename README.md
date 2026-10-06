@@ -25,6 +25,20 @@ foulder. This file must contain: the date, the number of products, the total pro
      * Then, we read its generated length using file.length().
      * Finally, we update the fileSize field and rewrite the file with the exact byte size.
 
+Exercise 3: Excel Export with Apache POI via DAO Delegation
 
+Generate an `.xlsx` Excel file in the `src/main/resources/export` folder populated with the processed inventory data.
 
-
+1. Service Layer Coordination (ProductoService.java):
+   * The `exportExcel(path, fileXml) method reuses the readFile(fileXml) method from Exercise 1 to retrieve the list of products with their already calculated costs and profits (`List<ProductoEntity>`).
+   * It delegates the responsibility of creating and saving the Excel file to the DAO by calling `productoDAO.exportExcelDAO(path, productos).
+  
+2. DAO Layer File Creation & Styling (ProductoDAOImpl.java):
+   We implemented the 'exportExcelDAO' method using private helper methods to keep the code clean and maintainable:
+   * Workbook & Sheet Initialization: Created an instance of 'XSSFWorkbook' and a sheet ('XSSFSheet') named "ResumenInventario".
+   * Styled Headers ('createHeaderRow'): Created the first row with column names ("Código", "Marca", "Modelo", "Categoría", "Precio Final", "Coste", "Beneficio"). Applied bold text, center alignment, and dark green borders.
+   * Data Population & Zebra Striping ('fillDataRow'):
+     * Iterated through the list of 'ProductoEntity' items and set cell values according to their data type.
+     * Applied a zebra pattern: odd rows feature a light green background, while even rows stay white.
+     * Formatted the first column ("Código") in bold text for emphasis.
+     * Called 'autoSizeColumn' across all 7 columns so cell widths adjust automatically to fit the content.
