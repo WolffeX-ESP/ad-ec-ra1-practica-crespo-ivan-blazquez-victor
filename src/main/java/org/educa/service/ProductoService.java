@@ -3,9 +3,8 @@ package org.educa.service;
 import generated.Producto;
 import generated.Productos;
 import jakarta.xml.bind.JAXBException;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.*;
 import org.educa.dao.ProductoDAO;
 import org.educa.dao.ProductoDAOImpl;
 import org.educa.entity.ProductoEntity;
@@ -95,10 +94,16 @@ public class ProductoService {
         // We create the book and file of Excel
         XSSFWorkbook libro = new XSSFWorkbook();
         XSSFSheet hoja = libro.createSheet("ResumenInventario");
+
         // Calling teh auxiliar methods
         createHeaderRow(hoja);
         fillDataRows(hoja, productos);
-        saveExcelFile(libro, path);
+
+        // We generate the dynamic file name requested in the instructions
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String fileName = "export_" + timestamp + ".xlsx";
+
+        saveExcelFile(libro, path, fileName);
     }
 
     /**
@@ -227,14 +232,30 @@ public class ProductoService {
      * @param hoja is the Excel file.
      */
     private void createHeaderRow(XSSFSheet hoja) {
+        XSSFWorkbook wb = hoja.getWorkbook();
+        XSSFCellStyle headerStyle = wb.createCellStyle();
+
+        // Setting up the font to bold
+        XSSFFont font = wb.createFont();
+        font.setBold(true);
+        headerStyle.setFont(font);
+
+        // Aligning the text to the center of the cell
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        // Applying the green borders using the auxiliar method
+        applyGreenBorder(headerStyle);
+
+        // Creating the first row, index 0
         XSSFRow filaCabecera = hoja.createRow(0);
-        filaCabecera.createCell(0).setCellValue("Código");
-        filaCabecera.createCell(1).setCellValue("Marca");
-        filaCabecera.createCell(2).setCellValue("Modelo");
-        filaCabecera.createCell(3).setCellValue("Categoría");
-        filaCabecera.createCell(4).setCellValue("Precio Final");
-        filaCabecera.createCell(5).setCellValue("Coste");
-        filaCabecera.createCell(6).setCellValue("Beneficio");
+        String[] titulos = {"Código", "Marca", "Modelo", "Categoría", "Precio Final", "Coste", "Beneficio"};
+
+        // Iterating through the titles array to create and style each cell
+        for (int i = 0; i < titulos.length; i++) {
+            XSSFCell celda = filaCabecera.createCell(i);
+            celda.setCellValue(titulos[i]);
+            celda.setCellStyle(headerStyle);
+        }
     }
 
     /**
@@ -244,20 +265,65 @@ public class ProductoService {
      * @param productos is a list of products entity with all the information.
      */
     private void fillDataRows(XSSFSheet hoja, List<ProductoEntity> productos) {
-        int numeroFila = 1;
-        for (ProductoEntity p : productos) {
-            XSSFRow fila = hoja.createRow(numeroFila);
+        XSSFWorkbook wb = hoja.getWorkbook();
+        XSSFFont fontBold = wb.createFont();
+        fontBold.setBold(true);
 
-            fila.createCell(0).setCellValue(p.getProducto().getCodigo());
-            fila.createCell(1).setCellValue(p.getProducto().getMarca());
-            fila.createCell(2).setCellValue(p.getProducto().getModelo());
-            fila.createCell(3).setCellValue(p.getProducto().getCategoria());
-            // We transfer from BigDecimal to Double, just because for Excel to know it like numbers
-            fila.createCell(4).setCellValue(p.getPrecioFinal().doubleValue());
-            fila.createCell(5).setCellValue(p.getCost().doubleValue());
-            fila.createCell(6).setCellValue(p.getProfit().doubleValue());
-            numeroFila++;
+        // We create the styles, being 0 the white and 1 the green, all this in an array
+        XSSFCellStyle[] estilos = {wb.createCellStyle(), wb.createCellStyle()};
+        estilos[1].setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
+        estilos[1].setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        // Styles with the black text for the first column
+        XSSFCellStyle[] estilosBold = {wb.createCellStyle(), wb.createCellStyle()};
+
+        for (int i = 0; i < 2; i++) {
+            estilos[i].setAlignment(HorizontalAlignment.CENTER);
+            applyGreenBorder(estilos[i]);
+            estilosBold[i].cloneStyleFrom(estilos[i]);
+            estilosBold[i].setFont(fontBold);
         }
+
+        int numFila = 1;
+        for (ProductoEntity p : productos) {
+            XSSFRow fila = hoja.createRow(numFila);
+            // 1 is green for odd ones, 0 is white for even ones
+            int colorIdx = (numFila % 2 != 0) ? 1 : 0;
+
+            // We put the data in an array to avoid the creation of all the cells by hand
+            Object[] datos = {
+                    p.getProducto().getCodigo(), p.getProducto().getMarca(),
+                    p.getProducto().getModelo(), p.getProducto().getCategoria(),
+                    p.getPrecioFinal().doubleValue(), p.getCost().doubleValue(), p.getProfit().doubleValue()
+            };
+
+            for (int i = 0; i < datos.length; i++) {
+                XSSFCell celda = fila.createCell(i);
+                if (datos[i] instanceof String) celda.setCellValue((String) datos[i]);
+                else celda.setCellValue((Double) datos[i]);
+
+                celda.setCellStyle(i == 0 ? estilosBold[colorIdx] : estilos[colorIdx]);
+            }
+            numFila++;
+        }
+
+        for (int i = 0; i < 7; i++) hoja.autoSizeColumn(i);
+    }
+
+    /**
+     * This method applies the green border on the table.
+     * @param estilo this parameter is to set the style.
+     */
+    private void applyGreenBorder(XSSFCellStyle estilo) {
+        // setting up the style from every border
+        estilo.setBorderTop(BorderStyle.THIN);
+        estilo.setTopBorderColor(IndexedColors.DARK_GREEN.getIndex());
+        estilo.setBorderBottom(BorderStyle.THIN);
+        estilo.setBottomBorderColor(IndexedColors.DARK_GREEN.getIndex());
+        estilo.setBorderLeft(BorderStyle.THIN);
+        estilo.setLeftBorderColor(IndexedColors.DARK_GREEN.getIndex());
+        estilo.setBorderRight(BorderStyle.THIN);
+        estilo.setRightBorderColor(IndexedColors.DARK_GREEN.getIndex());
     }
 
     /**
@@ -267,17 +333,16 @@ public class ProductoService {
      * @param path  is the destination directory.
      * @throws IOException this eror is for the operations of input and output.
      */
-    private void saveExcelFile(XSSFWorkbook libro, String path) throws IOException {
+    private void saveExcelFile(XSSFWorkbook libro, String path, String fileName) throws IOException {
         File carpeta = new File(path);
-        // a validation to know if the directory exists and if it doesn't, create a new one
-        if (!carpeta.exists()) {
+        if (!carpeta.exists()){
             carpeta.mkdirs();
         }
 
-        File archivoExcel = new File(carpeta, "inventario_final.xlsx");
-        FileOutputStream salida = new FileOutputStream(archivoExcel);
-        libro.write(salida);
-        salida.close();
+        try (FileOutputStream salida = new FileOutputStream(new File(carpeta, fileName))) {
+            libro.write(salida);
+        }
+        // try-with-resources close automatic the outputStream
         libro.close();
     }
 }
